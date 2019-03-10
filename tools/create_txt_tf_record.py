@@ -37,7 +37,7 @@ import tensorflow as tf
 from object_detection.utils import dataset_util
 from object_detection.utils import label_map_util
 
-from Tool.generate_random_box import random_rpn
+from tools.generate_random_box import random_rpn
 import numpy as np
 
 flags = tf.app.flags

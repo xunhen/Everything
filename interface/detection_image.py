@@ -3,9 +3,9 @@ import tensorflow as tf
 from PIL import Image
 
 from distutils.version import StrictVersion
-from Lib import model_builder
+from object_detection.builders import model_builder
 from object_detection.utils import config_util
-from Tool.generate_box_vibe import Generate_Box_By_ViBe
+from tools.generate_box_vibe import Generate_Box_By_ViBe
 import cv2
 import time
 

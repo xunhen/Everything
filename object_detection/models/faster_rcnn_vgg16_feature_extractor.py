@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from Lib import faster_rcnn_meta_arch
+from object_detection.meta_architectures import faster_rcnn_meta_arch
 import tensorflow.contrib.slim as slim
 
 

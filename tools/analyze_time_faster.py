@@ -13,12 +13,11 @@ from PIL import Image
 import tensorflow.contrib.slim as slim
 from object_detection.legacy import trainer
 from object_detection.builders import model_builder
-from Lib import model_builder
 
 from object_detection.utils import config_util
 from object_detection.utils import ops as utils_ops
 
-from Tool.generate_random_box import random_rpn
+from tools.generate_random_box import random_rpn
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
     raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
@@ -27,7 +26,7 @@ from utils import label_map_util
 from config import cfg
 
 import time
-from Tool.create_txt_tf_record import parse_txt
+from tools.create_txt_tf_record import parse_txt
 
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = os.path.join(cfg.DATASET_PATH, 'mscoco_label_map.pbtxt')
