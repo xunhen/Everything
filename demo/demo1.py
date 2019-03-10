@@ -18,9 +18,9 @@ from tools.generate_random_box import random_rpn
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
     raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
-from utils import label_map_util
+from object_detection.utils import label_map_util
 
-from utils import visualization_utils as vis_util
+from object_detection.utils import visualization_utils as vis_util
 from tools.create_txt_tf_record import parse_txt
 
 
@@ -187,8 +187,8 @@ if __name__ == '__main__':
     image_ids = [520, 536, 544]
     dataType = 'val2014'
     annFile = '{}/annotations/instances_{}.json'.format(path_to_image, dataType)
-    pipeline_config_path = r'model\faster_rcnn_resnet50_coco_2018_01_28\faster_rcnn_resnet50_coco_2018_01_28\pipeline.config'
-    restore_path = r'model\faster_rcnn_resnet50_coco_2018_01_28\faster_rcnn_resnet50_coco_2018_01_28\model.ckpt'
+    pipeline_config_path = r'..\model\faster_rcnn_resnet50_coco_2018_01_28\pipeline.config'
+    restore_path = r'..\model\faster_rcnn_resnet50_coco_2018_01_28\model.ckpt'
 
     random_jittle = False
 
