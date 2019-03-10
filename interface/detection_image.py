@@ -115,8 +115,8 @@ class Detection(object):
 
 
 if __name__ == '__main__':
-    pipeline_config_path = r'..\Model\pipeline\pipeline_resnet50.config'
-    restore_path = r'..\log\resnet50\train_org\model.ckpt-200000'
+    pipeline_config_path = r'..\model\pipeline\pipeline_resnet50.config'
+    restore_path = r'..\weights\resnet50\train_org\model.ckpt-200000'
     image_path = r'F:\\PostGraduate\\Projects\\background\\video\\post\\278.jpg'
     detection = Detection(pipeline_config_path, restore_path)
     detection.build_model()
