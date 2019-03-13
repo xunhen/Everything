@@ -3,7 +3,12 @@ from object_detection.utils import shape_utils
 from object_detection.core import box_list
 from object_detection.core import box_list_ops
 import numpy as np
+import time
 
+
+def filter_pixel(proposal_boxes, filter_boxes, proposal_scores, proposal_classes=None, filter_threshold=0.5,
+                 min_number=1, max_number=None):
+    pass
 
 def filter_bbox(proposal_boxes, filter_boxes, proposal_scores, proposal_classes=None, filter_threshold=0.5,
                 min_number=1, max_number=None):
@@ -59,7 +64,7 @@ def filter_bbox(proposal_boxes, filter_boxes, proposal_scores, proposal_classes=
             args[0]: boxes. A float tensor with shape
                         [num_proposals, 4] representing the (potentially zero
                         padded) proposal boxes for all images in the batch.
-                        the format is such as [x1,y2,x2,y2]
+                        the format is such as [x1,y1,x2,y2]
             args[1]: scores. A float tensor with shape
                         [num_proposals, num_class] representing the (potentially zero
                         added) proposal boxes for all images in the batch.
@@ -84,12 +89,15 @@ def filter_bbox(proposal_boxes, filter_boxes, proposal_scores, proposal_classes=
             classes = args[3]
         result_indice = tf.where(keep)
         result_indice = tf.squeeze(result_indice, axis=-1)
+
         boxes_result = tf.gather(boxes, result_indice)
         boxes_result = shape_utils.pad_or_clip_tensor(
             boxes_result, max_numbers)
+
         score_result = tf.gather(scores, result_indice)
         score_result = shape_utils.pad_or_clip_tensor(
             score_result, max_numbers)
+
         result = [boxes_result, score_result]
         if proposal_classes is not None:
             class_result = tf.gather(classes, result_indice)
@@ -128,10 +136,27 @@ if __name__ == '__main__':
         [[[0, 0, 4, 4], [5, 5, 7, 7], [7, 7, 8, 8]], [[0, 0, 3, 3], [5, 5, 8, 6.5], [7, 7, 8, 8]]],
         dtype=tf.float32)
     bg_filter_threshold = 0.5
+    # proposal_boxes = np.random.rand(1, 600, 4)
+    proposal_boxes = np.array([[[1, 1, 5, 5], [6, 6, 8, 8],[7, 7, 9, 9]]], dtype=np.float32)
+    proposal_boxes = np.tile(proposal_boxes, (1, 100, 1))
+    print(proposal_boxes.shape)
+    proposal_boxes = tf.convert_to_tensor(proposal_boxes, dtype=tf.float32)
+    proposal_score = tf.ones_like(proposal_boxes, dtype=tf.float32)
+    # filter_boxes = np.random.rand(1, 20, 4)
+    filter_boxes = np.array([[[1, 1, 2, 2], [6, 6, 6.1, 6.1]]],
+                            dtype=np.float32)
+    filter_boxes = np.tile(filter_boxes, (1, 10, 1))
+    print(filter_boxes.shape)
+    filter_boxes = tf.convert_to_tensor(filter_boxes, dtype=tf.float32)
+
+    proposal_boxes_result_, proposal_score_result_, validation_, max_number_=filter_bbox(proposal_boxes, filter_boxes, proposal_score, filter_threshold=bg_filter_threshold)
     with tf.Session() as sess:
-        proposal_boxes_result, proposal_score_result, validation = sess.run(
-            filter_bbox(proposal_boxes, bg_boxes, proposal_score, filter_threshold=bg_filter_threshold))
-        print('proposal_boxes_result:', proposal_boxes_result)
-        print('proposal_score_result:', proposal_score_result)
-        print('validation:', validation)
+        for i in range(20):
+            tic = time.time()
+            proposal_boxes_result, proposal_score_result, validation, max_number = sess.run(
+                [proposal_boxes_result_, proposal_score_result_, validation_, max_number_])
+            toc = time.time()
+            print('time', toc - tic)
+            print(max_number)
+            print(validation)
     pass

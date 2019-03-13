@@ -854,8 +854,10 @@ class FasterRCNNMetaArch(model.DetectionModel):
         proposal_boxes_normalized, proposal_boxes_scores, num_proposals = self._postprocess_rpn(
             rpn_box_encodings, rpn_objectness_predictions_with_background,
             anchors, image_shape_2d, true_image_shapes)
-        return self._predict_second_stage_rcnn(rpn_features_to_crop, image_shape, proposal_boxes_normalized,
+
+        prediction_dict=self._predict_second_stage_rcnn(rpn_features_to_crop, image_shape, proposal_boxes_normalized,
                                                proposal_boxes_scores, num_proposals)
+        return prediction_dict
 
     def _predict_second_stage_rcnn(self,
                                    rpn_features_to_crop,
@@ -963,6 +965,7 @@ class FasterRCNNMetaArch(model.DetectionModel):
             'proposal_boxes_normalized': proposal_boxes_normalized,
             # change by wjc
             'proposal_boxes_scores': proposal_boxes_scores,
+            'flattened_proposal_feature_maps':flattened_proposal_feature_maps
         }
 
         return prediction_dict
@@ -1530,7 +1533,6 @@ class FasterRCNNMetaArch(model.DetectionModel):
             tf.expand_dims(proposal_boxes, axis=2),
             tf.expand_dims(rpn_objectness_softmax_without_background, axis=2),
             clip_window=clip_window)
-
         # add by wjc
         if not self._is_training and self._filter_fn:
             groundtruth_boxlists = tf.convert_to_tensor([
