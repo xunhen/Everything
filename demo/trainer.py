@@ -31,7 +31,7 @@ from object_detection.core import standard_fields as fields
 from object_detection.utils import ops as util_ops
 from object_detection.utils import variables_helper
 from deployment import model_deploy
-from demo.config import cfg
+from config import cfg
 
 slim = tf.contrib.slim
 
