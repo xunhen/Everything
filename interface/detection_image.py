@@ -8,7 +8,7 @@ from object_detection.utils import config_util
 from tools.generate_box_vibe import Generate_Box_By_ViBe
 import cv2
 import time
-import sys, os
+import os
 from config import cfg
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     restore_path = r'..\weights\resnet50\train_org\model.ckpt-200000'
 
     image_path = os.path.join(cfg.ViBeProjectPath, 'video\pre\{}.jpg')
-    gray_path = os.path.join(cfg.ViBeProjectPath, 'video\ppost\{}.jpg')
+    gray_path = os.path.join(cfg.ViBeProjectPath, 'video\post\{}.jpg')
 
     detection = Detection(pipeline_config_path, restore_path, filter_threshold=0.5)
     detection.build_model()
@@ -169,7 +169,7 @@ if __name__ == '__main__':
     for i in range(5, 1000):
         image = cv2.imread(image_path.format(i + 1))
         image_gray = cv2.imread(gray_path.format(i + 1), cv2.IMREAD_GRAYSCALE)
-        print('-----------------', i, '-------------------')
+        print('-----------------', i + 1, '-------------------')
         boxes, filter = detection.detection(image, image_gray)
         # draw(np.copy(image), boxes, 'jieguo')
         # draw(np.copy(image), filter, 'jieguo1')

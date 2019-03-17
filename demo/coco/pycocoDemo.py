@@ -1,11 +1,15 @@
-import matplotlib.pyplot as plt
 from pycocotools.coco import COCO
+import matplotlib
+matplotlib.use('Qt5Agg')  # pylint: disable=multiple-statements
+import matplotlib.pyplot as plt
 import numpy as np
 import skimage.io as io
+import os
 import pylab
+from config import cfg
 def pycocoDemo():
     pylab.rcParams['figure.figsize'] = (8.0, 10.0)
-    dataDir = r'F:\PostGraduate\DataSet\COCO'
+    dataDir = os.path.join(cfg.DataSetPath,'COCO//2014')
     dataType = 'val2014'
     annFile = '{}/annotations/instances_{}.json'.format(dataDir, dataType)
     # initialize COCO api for instance annotations

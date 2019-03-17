@@ -20,7 +20,7 @@ class Generate_Box_By_ViBe(object):
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
         image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
         image = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-        _, contours, hierarchy = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         boxes = []
         for i in range(0, len(contours)):
             x, y, w, h = cv2.boundingRect(contours[i])

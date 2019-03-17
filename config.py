@@ -20,6 +20,7 @@ __C.TRAINED_MODEL = {'resnet50': _resnet50, 'inception_v2': _inception_v2}
 
 
 __C.ViBeProjectPath=r'D:\PostGraduate\Projects\background'
+__C.DataSetPath=r'D:\DataSet'
 
 # __C.HAS_RPN = True
 # __C.RANDOM_JITTLE = False
