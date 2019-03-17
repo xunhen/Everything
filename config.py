@@ -19,6 +19,8 @@ _inception_v2 = {'config': os.path.join('Model', 'faster_rcnn_inception_v2_coco_
 __C.TRAINED_MODEL = {'resnet50': _resnet50, 'inception_v2': _inception_v2}
 
 
+__C.ViBeProjectPath=r'D:\PostGraduate\Projects\background'
+
 # __C.HAS_RPN = True
 # __C.RANDOM_JITTLE = False
 #

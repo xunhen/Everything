@@ -8,6 +8,8 @@ from object_detection.utils import config_util
 from tools.generate_box_vibe import Generate_Box_By_ViBe
 import cv2
 import time
+import sys, os
+from config import cfg
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
     raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
@@ -92,19 +94,20 @@ class Detection(object):
             feed_dict[self._filter_box_list[0]] = bboxes  # only batch_size=1
         print('run begin!')
         tic = time.time()
-        #test=['refined_box_encodings','class_predictions_with_background','num_proposals','proposal_boxes','box_classifier_features','proposal_boxes_normalized','proposal_boxes_scores']
+        # test=['refined_box_encodings','class_predictions_with_background','num_proposals','proposal_boxes','box_classifier_features','proposal_boxes_normalized','proposal_boxes_scores']
         test = [
-                'box_classifier_features', 'proposal_boxes_normalized', 'proposal_boxes_scores']
-        flattened_proposal_feature_maps=self._sess.run(self._prediction_dict['flattened_proposal_feature_maps'], feed_dict=feed_dict)
+            'box_classifier_features', 'proposal_boxes_normalized', 'proposal_boxes_scores']
+        flattened_proposal_feature_maps = self._sess.run(self._prediction_dict['flattened_proposal_feature_maps'],
+                                                         feed_dict=feed_dict)
         toc = time.time()
-        print('flattened_proposal_feature_maps',flattened_proposal_feature_maps.shape)
+        print('flattened_proposal_feature_maps', flattened_proposal_feature_maps.shape)
         print('flattened_proposal_feature_maps time is:', (toc - tic) * 1000)
         tic = time.time()
         # test=['refined_box_encodings','class_predictions_with_background','num_proposals','proposal_boxes','box_classifier_features','proposal_boxes_normalized','proposal_boxes_scores']
         test = [
             'box_classifier_features', 'proposal_boxes_normalized', 'proposal_boxes_scores']
         box_classifier_features = self._sess.run(self._prediction_dict['box_classifier_features'],
-                                                         feed_dict=feed_dict)
+                                                 feed_dict=feed_dict)
         toc = time.time()
         print('box_classifier_features', box_classifier_features.shape)
         print('box_classifier_features time is:', (toc - tic) * 1000)
@@ -152,26 +155,19 @@ def draw(image, boxes, title):
 
 
 if __name__ == '__main__':
-    pipeline_config_path = r'E:\CODE\Python\Faster_RCNN_Loss\Model\pipeline\pipeline_resnet50.config'
-    restore_path = r'E:\CODE\Python\Faster_RCNN_Loss\log\train_org\model.ckpt-200000'
-    image_path = r'F:\\PostGraduate\\Projects\\background\\video\\pre\\6.jpg'
+    pipeline_config_path = r'..\model\pipeline\pipeline_resnet50.config'
+    restore_path = r'..\weights\resnet50\train_org\model.ckpt-200000'
+
+    image_path = os.path.join(cfg.ViBeProjectPath, 'video\pre\{}.jpg')
+    gray_path = os.path.join(cfg.ViBeProjectPath, 'video\ppost\{}.jpg')
+
     detection = Detection(pipeline_config_path, restore_path, filter_threshold=0.5)
     detection.build_model()
-    image = Image.open(image_path)
-    (im_width, im_height) = image.size
-    image = np.array(image.getdata()).reshape(
-        (im_height, im_width, 3)).astype(np.uint8)
-    image_path = r'F:\\PostGraduate\\Projects\\background\\video\\post\\6.jpg'
-    image_gray = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
-    image_path = r'F:\\PostGraduate\\Projects\\background\\video\\pre\\{}.jpg'
-    gray_path = r'F:\\PostGraduate\\Projects\\background\\video\\post\\{}.jpg'
+    image = cv2.imread(image_path.format(6))
+    image_gray = cv2.imread(gray_path.format(6), cv2.IMREAD_GRAYSCALE)
 
     for i in range(5, 1000):
-        image = Image.open(image_path.format(i + 1))
-        (im_width, im_height) = image.size
-        image = np.array(image.getdata()).reshape(
-            (im_height, im_width, 3)).astype(np.uint8)
+        image = cv2.imread(image_path.format(i + 1))
         image_gray = cv2.imread(gray_path.format(i + 1), cv2.IMREAD_GRAYSCALE)
         print('-----------------', i, '-------------------')
         boxes, filter = detection.detection(image, image_gray)
