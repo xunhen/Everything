@@ -76,7 +76,7 @@ FLAGS.val_image_dir = os.path.join(cfg.DataSetPath, 'COCO', '2017', 'val2017')
 FLAGS.test_image_dir = os.path.join(cfg.DataSetPath, 'COCO', '2017', 'test2017')
 FLAGS.train_annotations_file = os.path.join(cfg.DataSetPath, 'COCO', '2017','annotations', 'instances_train2017.json')
 FLAGS.val_annotations_file = os.path.join(cfg.DataSetPath, 'COCO', '2017','annotations', 'instances_val2017.json')
-FLAGS.testdev_annotations_file = os.path.join(cfg.DataSetPath, 'COCO', '2017','annotations', 'image_info_test-dev2017')
+FLAGS.testdev_annotations_file = os.path.join(cfg.DataSetPath, 'COCO', '2017','annotations', 'image_info_test-dev2017.json')
 FLAGS.output_dir = os.path.join(cfg.DataSetPath, 'TFrecord', 'COCO2017')
 
 
