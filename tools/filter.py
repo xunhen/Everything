@@ -11,7 +11,7 @@ def filter_pixel(proposal_boxes, filter_boxes, proposal_scores, proposal_classes
     pass
 
 def filter_bbox(proposal_boxes, filter_boxes, proposal_scores, proposal_classes=None, filter_threshold=0.5,
-                min_number=1, max_number=None):
+                min_number=100, max_number=None):
     """Returns proposal_boxes_result and validation.
 
         Args:

@@ -21,7 +21,7 @@ from tools.generate_random_box import random_rpn
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
     raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
-from utils import label_map_util
+from object_detection.utils import label_map_util
 
 from config import cfg
 

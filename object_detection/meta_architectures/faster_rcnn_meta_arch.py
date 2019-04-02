@@ -667,7 +667,9 @@ class FasterRCNNMetaArch(model.DetectionModel):
         Raises:
           ValueError: If `predict` is called before `preprocess`.
         """
-        self._first_stage_max_proposals = self._first_stage_max_proposals_backup
+        # if not self._is_training and self._filter_fn:
+        #     # self._first_stage_max_proposals = tf.Variable(self._first_stage_max_proposals_backup, trainable=False)
+        #     self._first_stage_max_proposals = tf.constant(self._first_stage_max_proposals)
         (rpn_box_predictor_features, rpn_features_to_crop, anchors_boxlist,
          image_shape, rpn_box_predictor_features_cascade) = self._extract_rpn_feature_maps(preprocessed_inputs)
         prediction_dict = dict()
@@ -855,8 +857,8 @@ class FasterRCNNMetaArch(model.DetectionModel):
             rpn_box_encodings, rpn_objectness_predictions_with_background,
             anchors, image_shape_2d, true_image_shapes)
 
-        prediction_dict=self._predict_second_stage_rcnn(rpn_features_to_crop, image_shape, proposal_boxes_normalized,
-                                               proposal_boxes_scores, num_proposals)
+        prediction_dict = self._predict_second_stage_rcnn(rpn_features_to_crop, image_shape, proposal_boxes_normalized,
+                                                          proposal_boxes_scores, num_proposals)
         return prediction_dict
 
     def _predict_second_stage_rcnn(self,
@@ -965,7 +967,7 @@ class FasterRCNNMetaArch(model.DetectionModel):
             'proposal_boxes_normalized': proposal_boxes_normalized,
             # change by wjc
             'proposal_boxes_scores': proposal_boxes_scores,
-            'flattened_proposal_feature_maps':flattened_proposal_feature_maps
+            'flattened_proposal_feature_maps': flattened_proposal_feature_maps
         }
 
         return prediction_dict

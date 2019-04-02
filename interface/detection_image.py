@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from tensorflow.python.client import timeline
 from PIL import Image
 
 from distutils.version import StrictVersion
@@ -9,7 +10,10 @@ from tools.generate_box_vibe import Generate_Box_By_ViBe
 import cv2
 import time
 import os
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from config import cfg
+from matplotlib import pyplot as plt
 
 if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
     raise ImportError('Please upgrade your TensorFlow installation to v1.9.* or later!')
@@ -17,7 +21,7 @@ if StrictVersion(tf.__version__) < StrictVersion('1.9.0'):
 
 class Detection(object):
     def __init__(self, pipeline_config_path, restore_path, filter_threshold=None, rpn_type='orginal_rpn',
-                 max_number=20):
+                 max_number=20, debug=False):
         self._rpn_type = rpn_type
         self._filter_fn_arg = None
         if filter_threshold:
@@ -29,7 +33,8 @@ class Detection(object):
         self._replace_rpn_arg = None
         self._graph = None
         self._first_stage_max_proposals = None
-
+        self._debug = debug
+        self._time_per = []
         self._average_time = 0
         self._average_filter_bboxes = 0
         self._total = 0
@@ -73,6 +78,9 @@ class Detection(object):
             self._sess = tf.Session()
             self._saver = tf.train.Saver()
             self._saver.restore(sess=self._sess, save_path=self._restore_path)
+            self._options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+            self._run_metadata = tf.RunMetadata()
+
         print('------------build_model_end------------')
 
     def detection(self, image, gray_image=None, need_count=1):
@@ -93,25 +101,10 @@ class Detection(object):
             print('filter_boxes: ', bboxes.shape)
             feed_dict[self._filter_box_list[0]] = bboxes  # only batch_size=1
         print('run begin!')
+
         tic = time.time()
-        # test=['refined_box_encodings','class_predictions_with_background','num_proposals','proposal_boxes','box_classifier_features','proposal_boxes_normalized','proposal_boxes_scores']
-        test = [
-            'box_classifier_features', 'proposal_boxes_normalized', 'proposal_boxes_scores']
-        flattened_proposal_feature_maps = self._sess.run(self._prediction_dict['flattened_proposal_feature_maps'],
-                                                         feed_dict=feed_dict)
-        toc = time.time()
-        print('flattened_proposal_feature_maps', flattened_proposal_feature_maps.shape)
-        print('flattened_proposal_feature_maps time is:', (toc - tic) * 1000)
-        tic = time.time()
-        # test=['refined_box_encodings','class_predictions_with_background','num_proposals','proposal_boxes','box_classifier_features','proposal_boxes_normalized','proposal_boxes_scores']
-        test = [
-            'box_classifier_features', 'proposal_boxes_normalized', 'proposal_boxes_scores']
-        box_classifier_features = self._sess.run(self._prediction_dict['box_classifier_features'],
-                                                 feed_dict=feed_dict)
-        toc = time.time()
-        print('box_classifier_features', box_classifier_features.shape)
-        print('box_classifier_features time is:', (toc - tic) * 1000)
-        tic = time.time()
+        # output_dict_, prediction_dict_ = self._sess.run([self._output_dict, self._prediction_dict],
+        #                                                 feed_dict=feed_dict,run_metadata=self._run_metadata,options=self._options)
         output_dict_, prediction_dict_ = self._sess.run([self._output_dict, self._prediction_dict],
                                                         feed_dict=feed_dict)
         toc = time.time()
@@ -129,6 +122,7 @@ class Detection(object):
             self._average_filter_bboxes = (self._average_filter_bboxes * self._total + self._first_stage_max_proposals -
                                            prediction_dict_['num_proposals'][0]) / (self._total + 1)
             self._average_time = (self._average_time * self._total + (toc - tic) * 1000) / (self._total + 1)
+            self._time_per.append((toc - tic) * 1000)
             self._total += 1
             print('average filtered number: ', self._average_filter_bboxes)
             print('average detection timer: {} ms'.format(self._average_time))
@@ -136,6 +130,23 @@ class Detection(object):
         print([np.array(result, dtype='double'), np.array(bboxes, dtype='double')])
         # return [output_dict_['detection_boxes'][0], output_dict_['detection_classes'][0]]
         return [np.array(result, dtype='double'), np.array(bboxes, dtype='double')]
+
+    def timeline(self):
+        fetched_timeline = timeline.Timeline(self._run_metadata.step_stats)
+        chrome_trace = fetched_timeline.generate_chrome_trace_format()
+        with open('Experiment_1.json', 'w') as f:
+            f.write(chrome_trace)
+        pass
+
+    def draw(self):
+        plt.xlabel('num')
+        plt.ylabel('time(ms)')
+        self._time_per = np.array(self._time_per)
+        x = list(range(self._time_per.size))
+        plt.plot(x, self._time_per)
+        plt.draw()
+        plt.show()
+        pass
 
     def finished(self):
         self._sess.close()
@@ -163,29 +174,17 @@ if __name__ == '__main__':
 
     detection = Detection(pipeline_config_path, restore_path, filter_threshold=0.5)
     detection.build_model()
+
     image = cv2.imread(image_path.format(6))
     image_gray = cv2.imread(gray_path.format(6), cv2.IMREAD_GRAYSCALE)
-
-    for i in range(5, 1000):
+    wrap_num = 5
+    for i in range(wrap_num):
+        boxes, filter = detection.detection(image, image_gray, need_count=0)
+    for i in range(0, 500):
         image = cv2.imread(image_path.format(i + 1))
         image_gray = cv2.imread(gray_path.format(i + 1), cv2.IMREAD_GRAYSCALE)
         print('-----------------', i + 1, '-------------------')
         boxes, filter = detection.detection(image, image_gray)
-        # draw(np.copy(image), boxes, 'jieguo')
-        # draw(np.copy(image), filter, 'jieguo1')
-        # cv2.imshow('gray', image_gray)
-        # print(detection.detection(image, image_gray))
-        # print(detection.detection(image, image_gray))
+
+    detection.draw()
     detection.finished()
-    # detection1 = Detection(pipeline_config_path, restore_path, filter_threshold=None)
-    # detection1.build_model()
-    # for i in range(75, 78):
-    #     image = Image.open(image_path.format(i + 1))
-    #     (im_width, im_height) = image.size
-    #     image = np.array(image.getdata()).reshape(
-    #         (im_height, im_width, 3)).astype(np.uint8)
-    #     image_gray = cv2.imread(gray_path.format(i + 1), cv2.IMREAD_GRAYSCALE)
-    #     print('-----------------', i, '-------------------')
-    #     boxes = detection1.detection(image, image_gray)[0]
-    #
-    # detection1.finished()
